@@ -13,23 +13,33 @@ const db = mysql.createConnection({
 // Function to promisify the database query
 function queryAsync(sql, params) {
     return new Promise((resolve, reject) => {
-      db.query(sql, params, (err, results) => {
-        if (err) reject(err);
-        else resolve(results);
-      });
+        db.query(sql, params, (err, results) => {
+            if (err) reject(err);
+            else resolve(results);
+        });
     });
-  }
+}
 
 async function viewDepartments() {
     try {
-      const results = await queryAsync('SELECT * FROM department');
-      console.table(results);
-      mainMenu();
+        const results = await queryAsync('SELECT * FROM department');
+        console.table(results);
+        mainMenu();
     } catch (err) {
-      console.error('Error while fetching departments:', err);
-      mainMenu();
+        console.error('Error while fetching departments:', err);
+        mainMenu();
     }
-  }
+}
+async function viewRoles() {
+    try {
+        const results = await queryAsync('SELECT * FROM role');
+        console.table(results);
+        mainMenu();
+    } catch (err) {
+        console.error('Error while fetching roles:', err);
+        mainMenu();
+    }
+}
 
 function mainMenu() {
     inquirer
@@ -52,17 +62,20 @@ function mainMenu() {
         ])
         .then((answers) => {
             switch (answers.action) {
-              case 'View all departments':
-                viewDepartments();
-                break;
-              case 'Exit':
-                db.end();
-                break;
-              default:
-                console.log('Invalid option. Please try again.');
-                mainMenu();
+                case 'View all departments':
+                    viewDepartments();
+                    break;
+                case 'View all roles':
+                    viewRoles();
+                    break;
+                case 'Exit':
+                    db.end();
+                    break;
+                default:
+                    console.log('Invalid option. Please try again.');
+                    mainMenu();
             }
-          });
+        });
 }
 
 // Connect to the database and start the application
