@@ -23,8 +23,15 @@ function queryAsync(sql, params) {
 
 async function viewDepartments() {
     try {
-        const results = await queryAsync('SELECT * FROM department');
-        console.table(results);
+        const results = await queryAsync('SELECT id as ID, name as Department FROM department');
+
+        const formattedResults = results.map(({ ID, ...rest }) => ({ ID: ID, ...rest }));
+        const table = new Table({ head: Object.keys(formattedResults[0]), style: { 'padding-left': 0, 'padding-right': 0 } });
+
+        formattedResults.forEach((row) => {
+            table.push(Object.values(row));
+        });
+        console.log(table.toString());
         mainMenu();
     } catch (err) {
         console.error('Error while fetching departments:', err);
@@ -36,6 +43,7 @@ async function viewRoles() {
         const results = await queryAsync(`SELECT r.id as ID, r.title as Title, r.salary as Salary, d.name as Department  FROM role as r
         INNER JOIN department as d
         on r.department_id = d.id;`);
+
         const formattedResults = results.map(({ ID, ...rest }) => ({ ID: ID, ...rest }));
         const table = new Table({ head: Object.keys(formattedResults[0]), style: { 'padding-left': 0, 'padding-right': 0 } });
 
@@ -53,14 +61,21 @@ async function viewRoles() {
 async function viewEmployees() {
     try {
         const results = await queryAsync(`
-        SELECT emp.id AS employee_id, emp.first_name AS First_Name, emp.last_name AS Last_Name, 
+        SELECT emp.id AS Employee_id, emp.first_name AS First_Name, emp.last_name AS Last_Name, 
         role.title AS Title, dept.name AS Department, role.salary AS Salary, manager.first_name AS Manager 
         FROM employee AS emp 
         LEFT JOIN employee AS manager ON emp.manager_id = manager.id 
         LEFT JOIN role ON emp.role_id = role.id 
         LEFT JOIN department AS dept ON role.department_id = dept.id
       `);
-        console.table(results)
+      const formattedResults = results.map(({ Employee_id, ...rest }) => ({ Emplyoyee_ID: Employee_id, ...rest }));
+      const table = new Table({ head: Object.keys(formattedResults[0]), style: { 'padding-left': 0, 'padding-right': 0 } });
+
+      formattedResults.forEach((row) => {
+          table.push(Object.values(row));
+      });
+      console.log(table.toString());
+        
         mainMenu();
     } catch (err) {
         console.error('Error while fetching employees:', err);
