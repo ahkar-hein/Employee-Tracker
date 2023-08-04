@@ -113,6 +113,52 @@ async function addRole() {
     }
 }
 
+async function addEmployee() {
+    try {
+        const roles = await queryAsync('SELECT id, title FROM role');
+        const employees = await queryAsync('SELECT id, first_name, last_name FROM employee');
+        employees.unshift({ id: null, first_name: 'None', last_name: '' });
+        const answers = await inquirer.prompt([
+            {
+                name: 'first_name',
+                type: 'input',
+                message: 'Enter the first name of the employee:',
+            },
+            {
+                name: 'last_name',
+                type: 'input',
+                message: 'Enter the last name of the employee:',
+            },
+            {
+                name: 'role_id',
+                type: 'list',
+                message: 'Choose the role for the employee:',
+                choices: roles.map((role) => ({ name: role.title, value: role.id })),
+            },
+            {
+                name: 'manager_id',
+                type: 'list',
+                message: 'Choose the manager for the employee:',
+                choices: employees.map((employee) => ({
+                    name: employee.id === null ? 'No Manager' : `${employee.first_name} ${employee.last_name}`,
+                    value: employee.id,
+                })),
+            },
+        ]);
+        await queryAsync('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [
+            answers.first_name,
+            answers.last_name,
+            answers.role_id,
+            answers.manager_id,
+        ]);
+        console.log('Employee added successfully!');
+        mainMenu();
+    } catch (err) {
+        console.error('Error while adding employee:', err);
+        mainMenu();
+    }
+}
+
 function mainMenu() {
     inquirer
         .prompt([
@@ -147,6 +193,9 @@ function mainMenu() {
                     addDepartment();
                 case 'Add a role':
                     addRole();
+                    break;
+                case 'Add an employee':
+                    addEmployee();
                     break;
                 case 'Exit':
                     db.end();
