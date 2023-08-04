@@ -41,6 +41,24 @@ async function viewRoles() {
     }
 }
 
+async function viewEmployees() {
+    try {
+        const results = await queryAsync(`
+        SELECT emp.id AS employee_id, emp.first_name AS First_Name, emp.last_name AS Last_Name, 
+        role.title AS Title, dept.name AS Department, role.salary AS Salary, manager.first_name AS Manager 
+        FROM employee AS emp 
+        LEFT JOIN employee AS manager ON emp.manager_id = manager.id 
+        LEFT JOIN role ON emp.role_id = role.id 
+        LEFT JOIN department AS dept ON role.department_id = dept.id
+      `);
+        console.table(results)
+        mainMenu();
+    } catch (err) {
+        console.error('Error while fetching employees:', err);
+        mainMenu();
+    }
+}
+
 function mainMenu() {
     inquirer
         .prompt([
@@ -67,6 +85,9 @@ function mainMenu() {
                     break;
                 case 'View all roles':
                     viewRoles();
+                    break;
+                case 'View all employees':
+                    viewEmployees();
                     break;
                 case 'Exit':
                     db.end();
