@@ -1,6 +1,7 @@
 // import required package.
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
+const Table = require('cli-table3');
 
 // Database connection
 const db = mysql.createConnection({
@@ -35,7 +36,13 @@ async function viewRoles() {
         const results = await queryAsync(`SELECT r.id as ID, r.title as Title, r.salary as Salary, d.name as Department  FROM role as r
         INNER JOIN department as d
         on r.department_id = d.id;`);
-        console.table(results);
+        const formattedResults = results.map(({ ID, ...rest }) => ({ ID: ID, ...rest }));
+        const table = new Table({ head: Object.keys(formattedResults[0]), style: { 'padding-left': 0, 'padding-right': 0 } });
+
+        formattedResults.forEach((row) => {
+            table.push(Object.values(row));
+        });
+        console.log(table.toString());
         mainMenu();
     } catch (err) {
         console.error('Error while fetching roles:', err);
