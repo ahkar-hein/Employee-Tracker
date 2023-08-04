@@ -59,6 +59,24 @@ async function viewEmployees() {
     }
 }
 
+async function addDepartment() {
+    try {
+        const answers = await inquirer.prompt([
+            {
+                name: 'name',
+                type: 'input',
+                message: 'Enter the name of the department:',
+            },
+        ]);
+        await queryAsync('INSERT INTO department (name) VALUES (?)', [answers.name]);
+        console.log('Department added successfully!');
+        mainMenu();
+    } catch (err) {
+        console.error('Error while adding department:', err);
+        mainMenu();
+    }
+}
+
 function mainMenu() {
     inquirer
         .prompt([
@@ -88,6 +106,9 @@ function mainMenu() {
                     break;
                 case 'View all employees':
                     viewEmployees();
+                    break;
+                case 'Add a department':
+                    addDepartment();
                     break;
                 case 'Exit':
                     db.end();
