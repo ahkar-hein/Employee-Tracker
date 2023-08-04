@@ -32,7 +32,9 @@ async function viewDepartments() {
 }
 async function viewRoles() {
     try {
-        const results = await queryAsync('SELECT * FROM role');
+        const results = await queryAsync(`SELECT r.id as ID, r.title as Title, r.salary as Salary, d.name as Department  FROM role as r
+        INNER JOIN department as d
+        on r.department_id = d.id;`);
         console.table(results);
         mainMenu();
     } catch (err) {
@@ -77,6 +79,40 @@ async function addDepartment() {
     }
 }
 
+async function addRole() {
+    try {
+        const departments = await queryAsync('SELECT id, name FROM department');
+        const answers = await inquirer.prompt([
+            {
+                name: 'title',
+                type: 'input',
+                message: 'Enter the title of the role:',
+            },
+            {
+                name: 'salary',
+                type: 'input',
+                message: 'Enter the salary for the role:',
+            },
+            {
+                name: 'department_id',
+                type: 'list',
+                message: 'Choose the department for the role:',
+                choices: departments.map((department) => ({ name: department.name, value: department.id })),
+            },
+        ]);
+        await queryAsync('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', [
+            answers.title,
+            answers.salary,
+            answers.department_id,
+        ]);
+        console.log('Role added successfully!');
+        mainMenu();
+    } catch (err) {
+        console.error('Error while adding role:', err);
+        mainMenu();
+    }
+}
+
 function mainMenu() {
     inquirer
         .prompt([
@@ -109,6 +145,8 @@ function mainMenu() {
                     break;
                 case 'Add a department':
                     addDepartment();
+                case 'Add a role':
+                    addRole();
                     break;
                 case 'Exit':
                     db.end();
